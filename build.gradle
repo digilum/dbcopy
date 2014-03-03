@@ -1,0 +1,36 @@
+import dbcopy.CopyDataTask
+
+repositories { 
+    mavenCentral()
+}
+
+configurations { driver }
+ 
+dependencies { 
+    driver 'com.oracle:ojdbc6:11.2.0.2.0'
+    driver 'com.microsoft.sqlserver:sqljdbc4:4.0.2206.100'
+    driver 'net.sourceforge.jtds:jtds:1.2.8'
+}
+ 
+URLClassLoader loader = GroovyObject.class.classLoader
+configurations.driver.each { File file ->
+    loader.addURL( file.toURL() )
+}
+
+Class.forName( 'oracle.jdbc.OracleDriver' )
+Class.forName( 'com.microsoft.sqlserver.jdbc.SQLServerDriver' )
+Class.forName( 'net.sourceforge.jtds.jdbc.Driver' )
+
+
+task dbcopy(type: dbcopy.CopyDataTask) {
+    sourceUrl = project.sourceUrl
+    sourceUser = project.sourceUser
+    sourcePassword = project.sourcePassword
+
+    targetUrl = project.targetUrl
+    targetUser = project.targetUser
+    targetPassword = project.targetPassword
+
+    copyTables = project.hasProperty( 'copyTables' ) ? project.copyTables : null
+    skipTables = project.hasProperty( 'skipTables' ) ? project.skipTables : null
+}
